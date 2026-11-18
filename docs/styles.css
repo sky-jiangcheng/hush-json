@@ -970,13 +970,37 @@
             color: #79c0ff;
         }
 
+        /* Depth-based key colors (JSON tree hierarchy) */
+        .jt-key-depth-0 { color: #79c0ff; }
+        .jt-key-depth-1 { color: #d2a8ff; }
+        .jt-key-depth-2 { color: #56d364; }
+        .jt-key-depth-3 { color: #f0883e; }
+        .jt-key-depth-4 { color: #ffa657; }
+        .jt-key-depth-5 { color: #79c0ff; } /* cycle back */
+
         .jt-string {
             color: #a5d6ff;
         }
 
+        /* Depth-based string colors */
+        .jt-str-depth-0 { color: #a5d6ff; }
+        .jt-str-depth-1 { color: #e0b0ff; }
+        .jt-str-depth-2 { color: #7ee787; }
+        .jt-str-depth-3 { color: #f5a868; }
+        .jt-str-depth-4 { color: #ffb47a; }
+        .jt-str-depth-5 { color: #a5d6ff; }
+
         .jt-number {
             color: #79c0ff;
         }
+
+        /* Depth-based number colors */
+        .jt-num-depth-0 { color: #79c0ff; }
+        .jt-num-depth-1 { color: #d2a8ff; }
+        .jt-num-depth-2 { color: #56d364; }
+        .jt-num-depth-3 { color: #f0883e; }
+        .jt-num-depth-4 { color: #ffa657; }
+        .jt-num-depth-5 { color: #79c0ff; }
 
         .jt-bool {
             color: #ff7b72;
@@ -1019,7 +1043,7 @@
 
         .jt-children {
             padding-left: 20px;
-            border-left: 1px solid rgba(48, 54, 61, 0.5);
+            border-left: 1px solid var(--border-light);
             margin-left: 8px;
         }
 
@@ -1041,6 +1065,39 @@
         .jt-group.collapsed .jt-toggle {
             transform: none;
         }
+
+        /* Light theme token palette: GitHub Light 系高对比色, 白底对比度均 ≥ 4.5:1。
+           暗色深度规则在前, 这里用 [data-theme] 提升特异性整体覆盖 */
+        [data-theme="light"] .jt-key { color: #0550ae; }
+        [data-theme="light"] .jt-string { color: #0a3069; }
+        [data-theme="light"] .jt-number { color: #0550ae; }
+        [data-theme="light"] .jt-bool { color: #cf222e; }
+        [data-theme="light"] .jt-null { color: #6e7681; }
+        [data-theme="light"] .jt-bracket,
+        [data-theme="light"] .jt-comma { color: #57606a; }
+
+        [data-theme="light"] .jt-key-depth-0,
+        [data-theme="light"] .jt-num-depth-0,
+        [data-theme="light"] .jt-key-depth-5,
+        [data-theme="light"] .jt-num-depth-5 { color: #0550ae; }
+        [data-theme="light"] .jt-str-depth-0,
+        [data-theme="light"] .jt-str-depth-5 { color: #0a3069; }
+
+        [data-theme="light"] .jt-key-depth-1,
+        [data-theme="light"] .jt-num-depth-1 { color: #8250df; }
+        [data-theme="light"] .jt-str-depth-1 { color: #6639ba; }
+
+        [data-theme="light"] .jt-key-depth-2,
+        [data-theme="light"] .jt-num-depth-2 { color: #116329; }
+        [data-theme="light"] .jt-str-depth-2 { color: #1a7f37; }
+
+        [data-theme="light"] .jt-key-depth-3,
+        [data-theme="light"] .jt-num-depth-3 { color: #bc4c00; }
+        [data-theme="light"] .jt-str-depth-3 { color: #953800; }
+
+        [data-theme="light"] .jt-key-depth-4,
+        [data-theme="light"] .jt-num-depth-4 { color: #9a6700; }
+        [data-theme="light"] .jt-str-depth-4 { color: #7d4e00; }
 
         /* ========== Search Match Highlight ========== */
         mark.jt-match {
