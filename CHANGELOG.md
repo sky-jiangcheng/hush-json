@@ -858,3 +858,31 @@
 
 ### Changed
 - 输出树与对比视图渲染包上降级保护：极深嵌套的合法 JSON 能通过 `JSON.parse` 却会让递归渲染栈溢出，现降级为纯文本展示而不是让异常打断输出区
+
+---
+
+## [1.5.86] - 2026-10-07
+
+### Changed
+- Mac App Store 上架名改为 `HushJSON: JSON Formatter X`（原 `HushJSON Mac: JSON Formatter` 触发 Apple 5.2.5 商标指南冲突），`bundle.macOS.bundleName` 同步；补记本条时该版本已提交上架
+
+---
+
+## [1.5.87] - 2026-11-18
+
+### Added
+- JSON 树形视图按嵌套深度彩虹配色：蓝 → 紫 → 绿 → 橙 → 琥珀，第 6 层循环回蓝；key / string / number 随层级变色，浅色与暗色主题各一套调色板
+
+### Fixed
+- 浅色主题下格式化输出呈「单一淡蓝色」的根因：树形 token 颜色硬编码 GitHub Dark 淡彩色（key 与 number 同为 `#79c0ff`、string `#a5d6ff`）且无任何浅色变体，而应用默认浅色主题，白底对比度仅 1.5~1.9:1。现新增 `[data-theme="light"]` 高对比调色板（GitHub Light 系，全部 token ≥ 4.5:1），暗色保持原调色板不变
+- 深度配色超过 5 层后失效：`jt-*-depth-N` 类名此前直接用原始深度值，≥6 层没有对应 CSS 规则而回退基色；现按 6 色槽取模循环
+- `build:macos` / `build:appstore` 未重建前端资源：此前直接打包 `dist/` 现有内容，忘记手动 `build:dist` 就会把过期前端打进上架包（App Store 版配色落后于网页版的直接原因）；现两条流水线在 `tauri build` 前强制 `npm run build:dist`
+
+### Changed
+- 树形缩进参考线由硬编码暗色值改为 `var(--border-light)`，随主题切换
+- 移除 `render.js` 中未接线的 `DEPTH_COLORS` / `getDepthColor` 死代码，token 颜色单一来源归于 CSS
+
+### Notes
+- 浅色深度色槽（key/num 与 string）：蓝 `#0550ae`/`#0a3069` → 紫 `#8250df`/`#6639ba` → 绿 `#116329`/`#1a7f37` → 橙 `#bc4c00`/`#953800` → 琥珀 `#9a6700`/`#7d4e00`
+- 已浏览器实测 light/dark 双主题：树形 token 对比度浅色 4.6~7.6:1、暗色 6.2~12.3:1；折叠/展开、压缩视图 hljs 高亮、主题切换 CSS 联动均无回归
+- App Store 用户需等本版本构建上架后才能看到修复；`src-tauri/embedded.provisionprofile` 不在仓库中，上架构建需在本机补齐签名材料后执行 `npm run build:appstore`

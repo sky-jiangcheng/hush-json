@@ -97,7 +97,7 @@
       try { obj = JSON.parse(content); } catch (e) { obj = null; }
     }
     var treeHtml = obj !== null
-      ? renderJsonNode(null, obj)
+      ? renderJsonNode(null, obj, 0)
       : '<pre><code class="language-json hljs">' + _actions.escapeHtml(content) + '</code></pre>';
     area.innerHTML = '<div class="output-content"><div class="json-tree">' + treeHtml + '</div></div>';
 
@@ -191,7 +191,7 @@
     var detailContent = document.getElementById('list-detail-content');
     var detailLinenos = document.getElementById('list-detail-linenos');
     if (detailContent) {
-      detailContent.innerHTML = '<div class="json-tree">' + renderJsonNode(null, arr[index]) + '</div>';
+      detailContent.innerHTML = '<div class="json-tree">' + renderJsonNode(null, arr[index], 0) + '</div>';
       updateTreeLineNumbers();
       detailContent.onscroll = function () {
         if (detailLinenos) detailLinenos.scrollTop = detailContent.scrollTop;
@@ -206,13 +206,18 @@
     if (view) view.classList.toggle('list-collapsed');
   }
 
-  function renderJsonNode(key, value) {
-    var prefix = key !== null ? '<span class="jt-key">' + esc(JSON.stringify(key)) + '</span>: ' : '';
+  // 颜色全部由 CSS 的 jt-*-depth-N 类按主题提供, JS 只负责取模循环色槽
+  var DEPTH_COLOR_SLOTS = 6;
+
+  function renderJsonNode(key, value, depth) {
+    depth = depth || 0;
+    var slot = depth % DEPTH_COLOR_SLOTS;
+    var prefix = key !== null ? '<span class="jt-key jt-key-depth-' + slot + '">' + esc(JSON.stringify(key)) + '</span>: ' : '';
 
     if (value === null) return '<span class="jt-line">' + prefix + '<span class="jt-null">null</span></span>';
     if (typeof value === 'boolean') return '<span class="jt-line">' + prefix + '<span class="jt-bool">' + value + '</span></span>';
-    if (typeof value === 'number') return '<span class="jt-line">' + prefix + '<span class="jt-number">' + value + '</span></span>';
-    if (typeof value === 'string') return '<span class="jt-line">' + prefix + '<span class="jt-string">' + esc(JSON.stringify(value)) + '</span></span>';
+    if (typeof value === 'number') return '<span class="jt-line">' + prefix + '<span class="jt-number jt-num-depth-' + slot + '">' + value + '</span></span>';
+    if (typeof value === 'string') return '<span class="jt-line">' + prefix + '<span class="jt-string jt-str-depth-' + slot + '">' + esc(JSON.stringify(value)) + '</span></span>';
 
     var toggleAttrs = 'role="button" tabindex="0" aria-label="' + _i18n.t('toggleNode') + '" data-jt-toggle="1"';
 
@@ -223,7 +228,7 @@
       html += '<span class="jt-line">' + prefix + '<span class="jt-toggle" ' + toggleAttrs + '>&#9660;</span><span class="jt-bracket">[</span><span class="jt-collapsed-summary"> [' + _i18n.t('items', { count: count }) + ']</span></span>';
       html += '<div class="jt-children">';
       for (var i = 0; i < count; i++) {
-        html += renderJsonNode(String(i), value[i]);
+        html += renderJsonNode(String(i), value[i], depth + 1);
         if (i < count - 1) html += '<span class="jt-comma">,</span>';
       }
       html += '</div>';
@@ -240,7 +245,7 @@
       html2 += '<span class="jt-line">' + prefix + '<span class="jt-toggle" ' + toggleAttrs + '>&#9660;</span><span class="jt-bracket">{</span><span class="jt-collapsed-summary"> {' + _i18n.t('keys', { count: kcount }) + '}</span></span>';
       html2 += '<div class="jt-children">';
       for (var k = 0; k < kcount; k++) {
-        html2 += renderJsonNode(keys[k], value[keys[k]]);
+        html2 += renderJsonNode(keys[k], value[keys[k]], depth + 1);
         if (k < kcount - 1) html2 += '<span class="jt-comma">,</span>';
       }
       html2 += '</div>';
@@ -868,7 +873,9 @@
     }
   }
 
-  function renderJsonNodeWithDiff(key, value, path, diffMap, side, rootVal) {
+  function renderJsonNodeWithDiff(key, value, path, diffMap, side, rootVal, depth) {
+    depth = depth || 0;
+    var color = getDepthColor(depth);
     var prefix = key !== null ? '<span class="jt-key">' + esc(JSON.stringify(key)) + '</span>: ' : '';
     var diffType = diffMap[path] || '';
     var diffCls = diffType ? ' jt-diff-' + (diffType === 'chg' ? 'changed' : diffType === 'add' ? 'added' : 'removed') : '';
@@ -886,7 +893,7 @@
       html += '<span class="jt-line">' + prefix + '<span class="jt-toggle" ' + toggleAttrs + '>&#9660;</span><span class="jt-bracket">[</span><span class="jt-collapsed-summary"> [' + _i18n.t('items', { count: count }) + ']</span></span>';
       html += '<div class="jt-children">';
       for (var i = 0; i < count; i++) {
-        html += renderJsonNodeWithDiff(String(i), value[i], path ? path + PATH_SEP + i : String(i), diffMap, side, rootVal);
+        html += renderJsonNodeWithDiff(String(i), value[i], path ? path + PATH_SEP + i : String(i), diffMap, side, rootVal, depth + 1);
         if (i < count - 1) html += '<span class="jt-comma">,</span>';
       }
       html += '</div>';
@@ -905,7 +912,7 @@
       for (var k = 0; k < kcount; k++) {
         var keyStr = keys[k];
         var childPath = path ? path + PATH_SEP + keyStr : keyStr;
-        html2 += renderJsonNodeWithDiff(keyStr, value[keyStr], childPath, diffMap, side, rootVal);
+        html2 += renderJsonNodeWithDiff(keyStr, value[keyStr], childPath, diffMap, side, rootVal, depth + 1);
         if (k < kcount - 1) html2 += '<span class="jt-comma">,</span>';
       }
       html2 += '</div>';
